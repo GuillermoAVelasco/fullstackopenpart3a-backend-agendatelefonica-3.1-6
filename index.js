@@ -1,5 +1,6 @@
 const { response } = require('express')
 const express=require('express')
+const morgan = require('morgan')
 const app=express()
 
 app.use(express.json())
@@ -21,6 +22,11 @@ let persons= [
       "id": 4
     }
 ]
+morgan.token('body', function(req, res, param) {
+    return JSON.stringify(req.body);
+});
+
+app.use(morgan(':method :url :status :req[content-length]  - :response-time ms :body'))
 
 app.get('/info',(req,res)=>{
     res.send(`Phonebook has info for ${persons.length} people <br> ${new Date()}`)
@@ -57,15 +63,15 @@ app.post('/api/persons',(req,res)=>{
     const {name,number}= req.body
 
     if(!name){
-        res.status(404).json({'error':'name is required'})
+        return res.status(404).json({'error':'name is required'})
     }
 
     if(getFindName(name)){
-        res.status(404).json({'error':'name must be unique'})
+        return res.status(404).json({'error':'name must be unique'})
     }
     
     if(!number){
-        res.status(404).json({'error':'number is required'})
+        return res.status(404).json({'error':'number is required'})
     }
 
     const person={
